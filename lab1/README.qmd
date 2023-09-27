@@ -24,11 +24,11 @@ editor: visual
 
 ## Описание шагов:
 
-1.  Воспользуемся RStudio
+1.  *Воспользуемся RStudio*
 
-2.  Заходим в Packages и устанавливаем swirl
+2.  *Заходим в Packages и устанавливаем swirl*
 
-3.  Проходим первый урок: Basic Building Blocks
+3.  *Проходим первый урок: Basic Building Blocks*
 
     Начало первого урока:\
     ![](foto/start1.png){width="437"}
@@ -167,7 +167,7 @@ z*2+1000
 
 Конец первого урока
 
-4.  Начало второго курса
+4.  *Начало второго курса*
 
 ![](foto/2_2.png){fig-align="center"}
 
@@ -288,7 +288,7 @@ setwd(old.dir)
 
 ![](foto/End2.png)
 
-5.  Третий курс: Sequences of Numbers
+5.  *Третий курс: Sequences of Numbers*
 
 ```{r}
 
