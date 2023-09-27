@@ -30,9 +30,8 @@ editor: visual
 
 3.  Проходим первый урок: Basic Building Blocks
 
-    Начало первого урока:
-
-![](images/image-1457903474.png)
+    Начало первого урока:\
+    ![](foto/start1.png){width="437"}
 
     In its simplest form, R can be used as an interactive calculator. Type 5 + 7 and press Enter
 
@@ -164,13 +163,18 @@ z*2+1000
 
 Сообщение о выполнении первого курса
 
-![](images/image-1796296961.png)
+![](foto/End1.png){fig-align="center"}
 
 Конец первого урока
 
 4.  Начало второго курса
 
-![](images/image-1139552407.png)
+![](foto/2_2.png){fig-align="center"}
+
+    Access information about the file "mytest.R" by using
+    | file.info().
+
+file.info("mytest.R")
 
     | Determine which directory your R session is using as its current working directory using getwd().
 
@@ -233,9 +237,58 @@ file.create("mytest.R")
 
 list.files()
 
-```{r}
+    Use file.exists("mytest.R") to check that a file exists.
 
-```
+file.exists("mytest.R")
+
+    [1] FALSE
+
+    Access information about the file "mytest.R" by using
+    | file.info()
+
+file.info("mytest.R")
+
+    | Nice work!
+
+    | You can use the $ operator --- e.g., file.info("mytest.R")$mode
+    | --- to grab specific items
+
+    Change the name of the file "mytest.R" to "mytest2.R" by using file.rename()
+
+file.rename("mytest.R", "mytest2.R")
+
+    | Make a copy of "mytest2.R" called "mytest3.R" using file.copy().
+
+file.copy("mytest2.R","mytest3.R")
+
+    | Provide the relative path to the file "mytest3.R" by using file.path().
+
+file.path("mytest3.R")
+
+    You can use file.path to construct file and directory paths that are independent of the operating system your R code is running on. Pass
+    | 'folder1' and 'folder2' as arguments to file.path to make a platform-independent pathname.
+
+file.path("folder1", "folder2")
+
+    | ?dir.create will show you the docs.
+
+    > ?dir.create
+
+    | Create a directory in the current working directory called "testdir2" and a subdirectory for it called "testdir3", all in one command by
+    | using dir.create() and file.path().
+
+dir.create(file.path('testdir2', 'testdir3'), recursive = TRUE)
+
+    | Go back to your original working directory using setwd(). (Recall that we created the variable old.dir with the full path for the orginal
+    | working directory at the start of these questions.)
+
+setwd(old.dir)
+
+Сообщение об окончании второго курса:
+
+![](foto/End2.png)
+
+5.  Третий курс: Sequences of Numbers
 
 ```{r}
 
