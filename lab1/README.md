@@ -1,9 +1,4 @@
----
-title: "Практическая работа 1"
-format: html
-editor: visual
----
-
+## Лабораторная работа 1
 ## Цель работы
 
 1.  Познакомиться с языком R
@@ -163,13 +158,13 @@ z*2+1000
 
 Сообщение о выполнении первого курса
 
-![](foto/End1.png){fig-align="center"}
+![](foto/End1.png)
 
 Конец первого урока
 
 4.  *Начало второго курса*
 
-![](foto/2_2.png){fig-align="center"}
+![](foto/2_2.png)
 
     Access information about the file "mytest.R" by using
     | file.info().
