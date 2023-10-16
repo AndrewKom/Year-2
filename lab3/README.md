@@ -62,7 +62,7 @@ library(dplyr)
 
 <!-- -->
 
-1.  Сколько строк в каждом датафрейме?
+2.  Сколько строк в каждом датафрейме?
 
 ``` r
 airports  %>% nrow()
@@ -94,7 +94,7 @@ weather  %>% nrow()
 
     [1] 26115
 
-1.  Сколько столбцов в каждом датафрейме?
+3.  Сколько столбцов в каждом датафрейме?
 
 ``` r
 airports  %>% ncol()
@@ -126,7 +126,7 @@ weather  %>% ncol()
 
     [1] 15
 
-1.  Как просмотреть примерный вид датафрейма?
+4.  Как просмотреть примерный вид датафрейма?
 
 ``` r
 airports  %>% glimpse()
@@ -216,7 +216,7 @@ airlines  %>% glimpse()
     $ carrier <chr> "9E", "AA", "AS", "B6", "DL", "EV", "F9", "FL", "HA", "MQ", "O…
     $ name    <chr> "Endeavor Air Inc.", "American Airlines Inc.", "Alaska Airline…
 
-1.  Cколько компаний-перевозчиков (carrier) учитывают эти наборы данных
+5.  Cколько компаний-перевозчиков (carrier) учитывают эти наборы данных
     (представлено в наборах данных)?
 
 ``` r
@@ -225,7 +225,7 @@ flights %>%  group_by(carrier)  %>%  summarise() %>% nrow()
 
     [1] 16
 
-1.  Сколько рейсов принял аэропорт John F Kennedy Intl в мае?
+6.  Сколько рейсов принял аэропорт John F Kennedy Intl в мае?
 
 ``` r
 flights %>% filter(month == 5 & origin == 'JFK')  %>% nrow()
@@ -233,7 +233,7 @@ flights %>% filter(month == 5 & origin == 'JFK')  %>% nrow()
 
     [1] 9397
 
-1.  Какой самый северный аэропорт?
+7.  Какой самый северный аэропорт?
 
 ``` r
 airports %>% arrange(desc(lat)) %>% slice(1) %>%
@@ -245,7 +245,7 @@ select(name)
       <chr>                  
     1 Dillant Hopkins Airport
 
-1.  Какой аэропорт самый высокогорный (находится выше всех над уровнем
+8.  Какой аэропорт самый высокогорный (находится выше всех над уровнем
     моря)?
 
 ``` r
@@ -266,7 +266,7 @@ planes %>% filter(!is.na(year)) %>%  arrange(year) %>% slice(1) %>% pull(tailnum
 
     [1] "N381AA"
 
-1.  Какая средняя температура воздуха была в сентябре в аэропорту John F
+10.  Какая средняя температура воздуха была в сентябре в аэропорту John F
     Kennedy Intl (в градусах Цельсия).
 
 ``` r
@@ -277,7 +277,7 @@ pull(a)
 
     [1] 19.38764
 
-1.  Самолеты какой авиакомпании совершили больше всего вылетов в июне?
+11.  Самолеты какой авиакомпании совершили больше всего вылетов в июне?
 
 ``` r
 b<- flights %>% filter(!is.na(carrier) & month == 6 & !is.na(month)) %>% group_by(carrier) %>% summarise("coun"=n()) %>% arrange(desc(coun)) %>% slice(1) %>% select(carrier)
@@ -289,7 +289,7 @@ airlines %>% filter(carrier == b$carrier) %>% select(name)
       <chr>                
     1 United Air Lines Inc.
 
-1.  Самолеты какой авиакомпании задерживались чаще других в 2013 году
+12.  Самолеты какой авиакомпании задерживались чаще других в 2013 году
 
     ``` r
     a<- flights %>% filter(!is.na(dep_delay) & year == 2013 & !is.na(arr_delay)) %>% group_by(carrier) %>% summarise("coun"=sum(arr_delay > 0)) %>% arrange(desc(coun)) %>% slice(1) %>% select(carrier)
