@@ -1,6 +1,8 @@
 ---
 title: "Практическая работа 2"
-format: html
+format:
+  md:
+    output-file: README.md
 editor: visual
 ---
 
@@ -82,8 +84,7 @@ starwars %>% filter(height < 170) %>% pull(name)
 starwars %>% mutate("ИМТ" = mass/(height*height)) %>% select(name,ИМТ)
 ```
 
-8. Найти 10 самых \"вытянутых\" персонажей. \"Вытянутость\" оценить по отношению массы (mass) к росту
-(height) персонажей.
+8.  Найти 10 самых "вытянутых" персонажей. "Вытянутость" оценить по отношению массы (mass) к росту (height) персонажей.
 
 ```{r}
 starwars %>% mutate("Вытянутость" = mass/height) %>% arrange(desc(Вытянутость)) %>% slice(1:10) %>% select(name,Вытянутость)

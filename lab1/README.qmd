@@ -1,6 +1,8 @@
 ---
 title: "Практическая работа 1"
-format: html
+format:
+  md:
+    output-file: README.md
 editor: visual
 ---
 
