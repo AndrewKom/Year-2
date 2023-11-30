@@ -46,31 +46,143 @@ library(tidyverse)
 library(readr)
 ```
 
-1.  Подготовка данных
+### **Подготовка данных**
 
-    Импортируйте данные DNS
+Импортируйте данные DNS
 
-    Добавьте пропущенные данные о структуре данных (назначении столбцов) Преобразуйте данные в столбцах в нужный формат
+Добавьте пропущенные данные о структуре данных (назначении столбцов) Преобразуйте данные в столбцах в нужный формат
 
-    ```{r}
-    DNS_name <- read.csv(file='header.csv')
-    DNS_name[3, "Field"] <- "id_orig_h"
-    DNS_name[4, "Field"] <- "id_orig_p"
-    DNS_name
-    ```
+```{r}
+DNS_name <- read.csv(file='header.csv')
+DNS_name[3, "Field"] <- "id_orig_h"
+DNS_name[4, "Field"] <- "id_orig_p"
+DNS_name
+```
 
-    ```{r}
-    Field <- DNS_name %>% select(Field)
-    Field <- pull(Field)
-    Field <- append(Field,"id_resp_h",4)
-    Field <- append(Field,"id_resp_p",5)
-    Field
-    ```
+2 Преобразуйте данные в столбцах в нужный формат
 
-    ```{r}
-    logs <- read.csv(file = "dns.log", sep="\t",col.names = Field)
+```{r}
+Field <- DNS_name %>% select(Field)
+Field <- pull(Field)
+Field <- append(Field,"id_resp_h",4)
+Field <- append(Field,"id_resp_p",5)
+Field
+```
 
-    ```
+```{r}
+logs <- read.csv(file = "dns.log", sep="\t",col.names = Field)
+
+logs$ts. <- as.POSIXct(logs$ts., origin="1970-01-01")
+
+logs %>% glimpse()
+```
+
+### **Анализ**
+
+1 Сколько участников информационного обмена в сети Доброй Организации?
+
+```{r}
+df <- data.frame(a = c(logs[,"id_orig_h"], logs[,"id_resp_h"]))
+un <- unique(df$a)
+length(un)
+
+```
+
+2 Какое соотношение участников обмена внутри сети и участников обращений к внешним ресурсам?
+
+```{r}
+ip<- c("192.168.", "10.", "100.([6-9]|1[0-1][0-9]|12[0-7]).", "172.((1[6-9])|(2[0-9])|(3[0-1])).")
+ips <- un[grep(paste(ip, collapse = "|"), un)]
+internal <- sum(un %in% ips)
+external <- length(un) - internal
+ratio <- internal / external
+ratio
+```
+
+3 Найдите топ-10 участников сети, проявляющих наибольшую сетевую активность
+
+```{r}
+df %>%  group_by(a=a)  %>%  summarise(active=n()) %>% arrange(desc(active)) %>% slice(1:10)
+```
+
+4 Найдите топ-10 доменов, к которым обращаются пользователи сети и соответственное количество обращений
+
+```{r}
+top_10 <- logs %>%  group_by(domain = tolower(query.))  %>%  summarise(active=n()) %>% arrange(desc(active)) %>% slice(1:10)
+top_10
+```
+
+5 Определите базовые статистические характеристики (функция summary()) интервала времени между последовательным обращениями к топ-10 доменам.
+
+```{r}
+sum <- logs %>% filter(tolower(query.) %in% top_10$domain) %>% arrange(ts.)
+time <- diff(sum$ts.)
+summary(time)
+```
+
+6 Часто вредоносное программное обеспечение использует DNS канал в качестве канала управления, периодически отправляя запросы на подконтрольный злоумышленникам DNS сервер. По периодическим запросам на один и тот же домен можно выявить скрытый DNS канал. Есть ли такие IP адреса в исследуемом датасете?
+
+```{r}
+DNS <- logs %>% group_by(ip = tolower(id_orig_h), domain = tolower(query.)) %>% summarise(request = n(), .groups = 'drop') %>% filter(request > 1700)
+DNS_top <- unique(DNS$ip) 
+DNS_top 
+```
+
+### **Обогащение данных**
+
+Определите местоположение (страну, город) и организацию-провайдера для топ-10 доменов. Для этого можно использовать сторонние сервисы (https://2ip.ru/whois/#result-anchor)
+
+*tools.google.com*
+
+ip: 142.250.185.206
+
+Хост: fra16s52-in-f14.1e100.net
+
+Город: Моунтайн-Вью
+
+Страна: США
+
+ip диапазон: 142.250.0.0 - 142.251.255.255
+
+Название провайдера: Google LLC
+
+*www.apple.com*
+
+ip: 23.40.25.24
+
+Город: Santa Clara
+
+Страна: США
+
+Название провайдера: Akamai Technologies, Inc.
+
+*time.apple.com*
+
+ip: 17.253.52.253
+
+Хост: ntp.euro.apple.com
+
+Город: Нью-Йорк
+
+Страна: США
+
+ip диапазон: 17.0.0.0 - 17.255.255.255
+
+Название провайдера: Apple Inc.
+
+*safebrowsing.clients.google.com*
+
+ip: 142.250.185.78
+
+Хост: fra16s48-in-f14.1e100.net
+
+Город: Моунтайн-Вью
+
+Страна: США
+
+ip диапазон: 142.250.0.0 - 142.251.255.255
+
+Название провайдера: Google LLC
 
 ## Оценка результатов
 
