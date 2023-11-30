@@ -13,7 +13,7 @@ editor: visual
     сетевом уровне модели OSI.
 3.  Закрепить практические навыки использования языка программирования R для
     обработки данных
-4.  Закрепить знания основных функций обработки данных экосистемы tidyverse языка R
+4.  Закрепить знания основных function обработки данных экосистемы tidyverse языка R
 
 ## Исходные данные
 
@@ -48,6 +48,10 @@ library(tidyverse)
 ```
 
 ```{r}
+library(lubridate)
+```
+
+```{r}
 library(readr)
 ```
 
@@ -59,27 +63,208 @@ library(readr)
 library(tidyverse)
 ```
 
+Импорт 1 - Анонсы беспроводных точек доступа
+
+```{r}
+log_1 <- read.csv("mir.csv-01.csv",nrows=167)
+```
+
+Импорт 2 - запросы на подключение клиентов к известным им точкам доступа
+
+```{r}
+log_2 = read.csv("mir.csv-01.csv", skip = 170)
+```
+
 2 Привести датасеты в вид \"аккуратных данных\", преобразовать типы столбцов в
 соответствии с типом данных
 
 ```{r}
-log <- read.csv("mir.csv-01.csv")
+log_1 <- log_1 %>% 
+  mutate_at(vars(BSSID, Privacy, Cipher, Authentication, LAN.IP, ESSID), trimws) %>%
+  mutate_at(vars(BSSID, Privacy, Cipher, Authentication, LAN.IP, ESSID), na_if, "")
+
+
+log_1$First.time.seen <- as.POSIXct(log_1$First.time.seen, origin="1970-01-01")
+log_1$Last.time.seen <- as.POSIXct(log_1$Last.time.seen, origin="1970-01-01")
+```
+
+```{r}
+log_2 <- log_2 %>% 
+  mutate_at(vars(Station.MAC, BSSID, Probed.ESSIDs), trimws) %>%
+  mutate_at(vars(Station.MAC, BSSID, Probed.ESSIDs), na_if, "")
+
+log_2$First.time.seen <- as.POSIXct(log_2$First.time.seen, format = "%Y-%m-%d %H:%M:%S")
+log_2$Last.time.seen <- as.POSIXct(log_2$Last.time.seen, format = "%Y-%m-%d %H:%M:%S")
 ```
 
 3 Просмотрите общую структуру данных с помощью функции glimpse()
 
 ```{r}
-glimpse(log)
+glimpse(log_1)
+```
+
+```{r}
+glimpse(log_2)
 ```
 
 ### **Анализ**
 
+1 Определить небезопасные точки доступа (без шифрования -- OPN)
+
+OPN = нет шифрования,
+
+```{r}
+first <- log_1 %>% filter(Privacy=="OPN") %>%  select(BSSID, ESSID)
+first <- unique(first$BSSID) 
+first
+```
+
+2 Определить производителя для каждого обнаруженного устройства (https://ouilookup.com/)
+
+-   E8:28:C1:DE:47:D0 - **Company:** Eltex Enterprise Ltd.
+
+-   00:26:99:F2:7A:EF - **Company:** Cisco Systems, Inc
+
+-   E8:28:C1:DC:BD:52 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DE:47:D1 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DC:C8:31 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DD:04:42 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DC:C6:B1 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DE:47:D2 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DD:04:4 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DD:04:40 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DC:B2:42 - **Company:** Eltex Enterprise Ltd.
+
+-   00:26:99:F2:7A:E0 - **Company:** Cisco Systems, Inc
+
+-   E8:28:C1:DC:B2:40 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DC:B2:41 - **Company:** Eltex Enterprise Ltd.
+
+-   E0:D9:E3:48:FF:D2 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DE:74:30 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DD:04:50 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DD:04:51 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DC:C8:30 - **Company:** Eltex Enterprise Ltd.
+
+-   00:25:00:FF:94:73 - **Company:** Apple, Inc.
+
+-   E8:28:C1:DC:B2:52 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DC:B2:50 - **Company:** Eltex Enterprise Ltd.
+
+-   E8:28:C1:DC:B2:51 - **Company:** Eltex Enterprise Ltd.
+
+3 Выявить устройства, использующие последнюю версию протокола шифрования
+WPA3, и названия точек доступа, реализованных на этих устройствах
+
+```{r}
+zad3 <- log_1[str_detect(log_1$Privacy, "WPA3"), ] %>% filter(!is.na(Privacy)) %>% select(BSSID, ESSID, Privacy)
+zad3
+```
+
+4 Отсортировать точки доступа по интервалу времени, в течение которого они находились на связи, по убыванию.
+
+```{r}
+time <- log_1 %>% mutate(Time = seconds_to_period(Last.time.seen - First.time.seen)) %>% arrange(desc(Time)) %>%  select(BSSID, Last.time.seen,First.time.seen, Time)
+time
+```
+
+5 Обнаружить топ-10 самых быстрых точек доступа
+
+```{r}
+log_1 %>% arrange(desc(Speed)) %>%  select(BSSID, ESSID, Speed) %>% slice(1:10)
+```
+
+6 Отсортировать точки доступа по частоте отправки запросов (beacons) в единицу времени по их убыванию.
+
+```{r}
+time2 <- log_1 %>% mutate(Time = seconds_to_period(Last.time.seen - First.time.seen)) %>% arrange(desc(Time)) %>% select(BSSID, Last.time.seen,First.time.seen, X..beacons, Time)
+time2 <- time2 %>% filter(Time!="0" | X..beacons!="0") %>%  mutate(beacon = as.integer(X..beacons)/ as.integer(Time)) %>% arrange(desc(beacon)) %>% filter(!is.infinite(beacon)) %>% select(BSSID, X..beacons, Time,beacon)
+time2
+```
+
 ### **Данные клиентов**
+
+1 Определить производителя для каждого обнаруженного устройства (https://ouilookup.com/)
+
+```{r}
+ms1 <- log_2 %>% filter(BSSID!="(not associated)") %>% select(BSSID)
+ms1 <- unique(ms1$BSSID) 
+ms1
+```
+
+-   00:25:00 Apple, Inc.
+
+-   00:03:7F Atheros Communications, Inc.
+
+-   00:23:EB Cisco Systems, Inc
+
+-   00:0D:97 Hitachi Energy USA Inc.
+
+-   08:3A:2F Guangzhou Juan Intelligent Tech Joint Stock Co.,Ltd
+
+-   E0:D9:E3 Eltex Enterprise Ltd.
+
+-   DC:09:4C Huawei Technologies Co.,Ltd
+
+-   E8:28:C1 Eltex Enterprise Ltd.
+
+-   0C:80:63 Tp-Link Technologies Co.,Ltd.
+
+-   00:26:99 Cisco Systems, Inc
+
+2 Обнаружить устройства, которые НЕ рандомизируют свой MAC адрес
+
+```{r}
+log_2 %>% filter(grepl("(.2:..:..:)(..:..:..)", Station.MAC)!=TRUE & grepl("(.6:..:..:)(..:..:..)", Station.MAC)!=TRUE & grepl("(.A:..:..:)(..:..:..)", Station.MAC)!=TRUE & grepl("(.E:..:..:)(..:..:..)", Station.MAC)!=TRUE) %>%  select(Station.MAC)
+```
+
+3 Кластеризовать запросы от устройств к точкам доступа по их именам.
+Определить время появления устройства в зоне радиовидимости и время выхода его из нее
+
+```{r}
+cluster <- log_2 %>% filter(!is.na(Probed.ESSIDs)) %>% group_by(Probed.ESSIDs) %>%  summarise(
+  "min time" = min(First.time.seen),
+  "max time" = max(Last.time.seen),
+  
+)
+cluster
+```
+
+4 Оценить стабильность уровня сигнала внури кластера во времени. Выявить наиболее стабильный кластер
+
+```{r}
+
+time2 <- log_2 %>% mutate(Time = Last.time.seen - First.time.seen) %>% arrange(desc(Time))
+
+time2 <- time2 %>% filter(!is.na(Probed.ESSIDs))%>% filter(Time!="0") %>% group_by(Probed.ESSIDs) %>%  summarise(
+  "mean" = mean(Time),
+  "sd" = sd(Time)
+  
+)
+
+time2 %>% filter(!is.na(sd) & sd!="0") %>% arrange(sd) %>% slice(1)
+
+
+```
 
 ## Оценка результатов
 
 Задача выполнена при помощи приложения RStudio, удалось
-закрепить знания основных функций обработки данных экосистемы tidyverse
+закрепить знания основных функций обработки данных экосистемы tidyverse.
 
 ## Вывод
 
