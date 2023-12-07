@@ -22,8 +22,7 @@ editor: visual
 ## План
 
 1.  Используем RStudio
-2.  Используя программный пакет dplyr языка программирования R провести анализ файл с
-    выгрузкой данных из системы SIEM. Выявить факт компрометации
+2.  Используя программный пакет dplyr языка программирования R провести анализ файла с выгрузкой данных из системы SIEM. Выявить факт компрометации
 3.  Создать отчет
 
 ## Описание шагов:
@@ -38,9 +37,87 @@ editor: visual
 
 ### **Подготовка данных**
 
-1
+```{r}
+
+library(jsonlite)
+library(tidyr)
+library(dplyr)
+```
+
+1 Импортируйте данные в R (Датасет находится по адресу https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz.)
+
+```{r}
+info_json <- jsonlite::stream_in(file('info_analyz.json'))
+```
+
+```{r}
+library(xml2)
+library(rvest)
+webpage_url <- "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/appendix-l--events-to-monitor"
+webpage <- xml2::read_html(webpage_url)
+event_df <- rvest::html_table(webpage)[[1]]
+event_df
+```
+
+2.  Привести датасеты в вид "аккуратных данных", преобразовать типы столбцов в соответствии с типом данных
+
+```{r}
+info_json <- info_json %>% mutate('@timestamp'= as.POSIXct(`@timestamp`, format = "%Y-%m-%dT%H:%M:%OSZ", tz = "UTC"))
+info_json %>% select(`@timestamp`) %>% slice(1:10)
+```
+
+3 Просмотрите общую структуру данных с помощью функции glimpse()
+
+```{r}
+glimpse(info_json)
+```
 
 ### **Анализ**
+
+1 Раскройте датафрейм избавившись от вложенных датафреймов (Для обнаружения таких можно использовать функцию dplyr::glimpse() , а для раскрытия вложенности -- tidyr::unnest())
+
+```{r}
+info_json_vl <- info_json %>%  
+  tidyr::unnest(c('@metadata', event, log, winlog, ecs, host, agent), names_sep = ".") %>% 
+  tidyr::unnest(c(winlog.event_data,winlog.process,winlog.user, winlog.user_data,), names_sep = ".")
+glimpse(info_json_vl)
+```
+
+2 Минимизируйте количество колонок в датафрейме -- уберите колоки с единственным значением параметра.
+
+```{r}
+uniquelength <- sapply(info_json_vl,function(x) length(unique(x) ))
+info_clear <- subset(info_json_vl, select=uniquelength>1)
+glimpse(info_clear)
+```
+
+3 Какое количество хостов представлено в данном датасете?
+
+```{r}
+info_json_vl %>% distinct(agent.hostname) %>% nrow()
+```
+
+4 Подготовьте датафрейм с расшифровкой Windows Event_ID, приведите типы данных к типу их значений.
+
+```{r}
+df <- merge(x = info_clear, y = event_df, by.x="event.code", by.y = "Current Windows Event ID")
+```
+
+```{r}
+df2 <- merge(x = info_clear, y = event_df, by.x="event.code", by.y = "Legacy Windows Event ID")
+```
+
+5 Есть ли в логе события с высоким и средним уровнем значимости? Сколько их?
+
+```{r}
+df %>%  filter(`Potential Criticality` == "Medium"
+| `Potential Criticality` == "High" | `Potential Criticality` == "Medium to High" ) %>% nrow()
+```
+
+```{r}
+df2 %>%  filter(`Potential Criticality` == "Medium"
+| `Potential Criticality` == "High" | `Potential Criticality` == "Medium to High" ) %>% nrow()
+```
 
 ## Оценка результатов
 
