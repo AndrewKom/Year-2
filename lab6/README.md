@@ -66,11 +66,29 @@ library(dplyr)
 
         intersect, setdiff, setequal, union
 
+``` r
+library(xml2)
+```
+
+    Warning: пакет 'xml2' был собран под R версии 4.2.3
+
+``` r
+library(rvest)
+```
+
+    Warning: пакет 'rvest' был собран под R версии 4.2.3
+
 1 Импортируйте данные в R (Датасет находится по адресу
 https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz.)
 
 ``` r
-info_json <- jsonlite::stream_in(file('info_analyz.json'))
+download.file("https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz", destfile = file <- tempfile(fileext = ".tar.gz"), mode = "wb")
+
+temp <- tempdir()
+untar(file, exdir = temp)
+
+json <- list.files(temp, pattern="\\.json$", full.names = TRUE, recursive = TRUE)
+info_json <- stream_in(file(json))
 ```
 
     opening file input connection.
@@ -283,18 +301,6 @@ info_json <- jsonlite::stream_in(file('info_analyz.json'))
      Imported 101904 records. Simplifying...
 
     closing file input connection.
-
-``` r
-library(xml2)
-```
-
-    Warning: пакет 'xml2' был собран под R версии 4.2.3
-
-``` r
-library(rvest)
-```
-
-    Warning: пакет 'rvest' был собран под R версии 4.2.3
 
 ``` r
 webpage_url <- "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/appendix-l--events-to-monitor"

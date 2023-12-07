@@ -42,17 +42,23 @@ editor: visual
 library(jsonlite)
 library(tidyr)
 library(dplyr)
+library(xml2)
+library(rvest)
 ```
 
 1 Импортируйте данные в R (Датасет находится по адресу https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz.)
 
 ```{r}
-info_json <- jsonlite::stream_in(file('info_analyz.json'))
+download.file("https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz", destfile = file <- tempfile(fileext = ".tar.gz"), mode = "wb")
+
+temp <- tempdir()
+untar(file, exdir = temp)
+
+json <- list.files(temp, pattern="\\.json$", full.names = TRUE, recursive = TRUE)
+info_json <- stream_in(file(json))
 ```
 
 ```{r}
-library(xml2)
-library(rvest)
 webpage_url <- "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/appendix-l--events-to-monitor"
 webpage <- xml2::read_html(webpage_url)
 event_df <- rvest::html_table(webpage)[[1]]
