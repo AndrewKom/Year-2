@@ -3,7 +3,6 @@ title: "Практическая работа 4"
 format:
   md:
     output-file: README.md
-editor: visual
 ---
 
 ## Цель работы
