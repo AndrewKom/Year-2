@@ -61,13 +61,13 @@ library(tidyverse)
 Импорт 1 - Анонсы беспроводных точек доступа
 
 ```{r}
-log_1 <- read.csv("mir.csv-01.csv",nrows=167)
+log_1 <- read.csv("https://raw.githubusercontent.com/AndrewKom/Year-2/main/lab5/mir.csv-01.csv",nrows=167)
 ```
 
 Импорт 2 - запросы на подключение клиентов к известным им точкам доступа
 
 ```{r}
-log_2 = read.csv("mir.csv-01.csv", skip = 170)
+log_2 = read.csv("https://raw.githubusercontent.com/AndrewKom/Year-2/main/lab5/mir.csv-01.csv", skip = 169)
 ```
 
 2 Привести датасеты в вид "аккуратных данных", преобразовать типы столбцов в соответствии с типом данных
