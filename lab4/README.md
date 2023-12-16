@@ -83,7 +83,7 @@ library(readr)
 Преобразуйте данные в столбцах в нужный формат
 
 ``` r
-DNS_name <- read.csv(file='header.csv')
+DNS_name <- read.csv(file='https://raw.githubusercontent.com/AndrewKom/Year-2/main/lab4/header.csv')
 DNS_name[3, "Field"] <- "id_orig_h"
 DNS_name[4, "Field"] <- "id_orig_p"
 DNS_name
@@ -151,7 +151,7 @@ Field
     [21] "answers "     "TTLs "        "rejected "   
 
 ``` r
-logs <- read.csv(file = "dns.log", sep="\t",col.names = Field)
+logs <- read.csv(file = "https://raw.githubusercontent.com/AndrewKom/Year-2/main/lab4/dns.log", sep="\t",col.names = Field)
 
 logs$ts. <- as.POSIXct(logs$ts., origin="1970-01-01")
 
