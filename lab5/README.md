@@ -94,7 +94,7 @@ library(tidyverse)
 ``` r
 #log_1 <- read.csv("mir.csv-01.csv",nrows=167)
 #log_1 <- read.csv("https://raw.githubusercontent.com/AndrewKom/Year-2/main/lab5/mir.csv-01.csv",nrows=167)
-
+log <-read.csv(file=file.path("mir.csv-01.csv"))
 log_1 <- read.csv(file=file.path("mir.csv-01.csv"),nrows=167)
 ```
 
